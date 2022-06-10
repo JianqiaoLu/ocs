@@ -1,0 +1,179 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{algpseudocode}
+\usepackage[]{algorithm2e}
+\usepackage{booktabs}
+\title{d-regular graph}
+\author{lujianqiao}
+\date{December 2021}
+\begin{document}
+
+
+
+\maketitle
+
+\section{ Introduction}
+\subsection{d-regular graphs}
+
+The matching problem is to find a set of edges without common vertices in a graph.
+A bipartite graph can be seperated into two vertices set such that all edges have one endpoint on each side. 
+In the online bipartite matching problem, one-side vertices of the bipartite graph is known while the other side is revealed once a time.
+We restrict our attention to the maximum online matching problem in the d-regular bipartite graphs.
+A d-regular bipartite graph is a bipartite graph in which each vertex is adjacent to exactly d neighbors.
+
+\subsection{ Multi-way Semi-OCS in the d-regular graph}
+
+We define $N^t$ as the set of vertices neighbors online vertex $t$. 
+The algorithm aims to bound the unmatched possibility of a set of elements $\mathcal{E}$.
+Upon a online vertex $t$'s arrival, a non-negative vector is assigned $\boldsymbol{x}^{t}=\left(x_{e}^{t}\right)_{e \in \mathcal{E}}$ such that $\sum_{e \in \mathcal{E}} x_{e}^{t}=1.$
+If $e \in N^t$, $x_{e}^{t} = \frac{1}{d}$.
+Otherwise $x_{e}^{t} = 0$.
+Let $\mathcal{E}^{t}=N^t \cap\mathcal{E} $ be the subsets of $\mathcal{E}$ and may be matched in the $t$ round.
+Let $y_{e}^{t}=\sum_{t^{\prime} \leq t} x_{e}^{t^{\prime}}$ be the sum of weight mass assigned to $e$ in the previous $t$ rounds.
+
+In this algorithm, the sampling weight is parameterized by $w(y)  =\frac{1}{1-y(1-\varepsilon)}$.
+Specifically, if the element has been matched previously then the sampling weight is $0$. 
+Otherwise, it equals to $x_{e}^{t} \cdot w\left(y_{e}^{t-1}\right)$. 
+See Algorithm \ref{tab:multi-ocs}.
+\\
+\begin{tabular}{l}
+\toprule  %添加表格头部粗线
+\textbf{Algorithm} Multi-way Semi-OCS: Weighted Sampling without Replacement\\
+\midrule  %添加表格中横线
+\textbf{Parameters:} \\
+\quad Non-decreasing weight function $w(y)$
+\\
+\textbf{State variables:}\\
+\quad  weight mass $x_e^t$ of element e in this round 
+\\
+\quad  Cumulative mass $y_e^t$  of element e up to any round t.
+
+\\
+\textbf{For each round t:}\\
+\quad 1. If all elements in $\mathcal{E}^{t}$ have been selected, select arbitrarily, e.g., uniformly at random.
+\\
+\quad 2. Otherwise, select an unselected $e \in \mathcal{E}^{t}$ with probability proportional $x_{e}^{t} \cdot w\left(y_{e}^{t-1}\right)$
+\\
+\bottomrule %添加表格底部粗线
+\label{tab:multi-ocs}
+\end{tabular}
+
+
+\subsection{Iterative Formula}
+What we need to prove is as follows:
+\\
+Denote $\mathcal{U}^{t}$ as the set of unselected elements after round t. We shall prove on $0 \leq t \leq d$ such that
+\begin{equation*}
+\begin{aligned}
+\operatorname{Pr}\left[\mathcal{E}^{\prime} \subseteq \mathcal{U}^{t}\right] \leq \prod_{e \in \mathcal{E}^{\prime}} p\left(y_{e}^{t}\right)
+\end{aligned}
+\end{equation*}
+$t = 0$: It is trival since  $y_e^0=0, p(0)=1$.
+\\
+$1\leq t \leq d$: Suppose the inequality holds for $t -1$, let $\bar{X}_{e}^{t}$ be the indicator of whether element e is unselected after round t, and define $\bar{X}_{\mathcal{E}^{\prime}}^{t}=\prod_{e \in \mathcal{E}^{\prime}} \bar{X}_{e}^{t}$. 
+\begin{equation*}
+\begin{aligned} \operatorname{Pr}\left[\mathcal{E}^{\prime} \subseteq \mathcal{U}^{t}\right] &=\mathbf{E} \bar{X}_{\mathcal{E}^{\prime}}^{t} \\ &=\mathbf{E}_{\bar{X}^{t-1}}\left[\bar{X}_{\mathcal{E}^{\prime}}^{t-1}\left(1-\frac{\sum_{e \in \mathcal{E}^{\prime}} w\left(y_{e}^{t-1}\right) x_{e}^{t} \bar{X}_{e}^{t-1}}{\sum_{e \in \mathcal{E}} w\left(y_{e}^{t-1}\right) x_{e}^{t} \bar{X}_{e}^{t-1}}\right)\right] 
+\end{aligned}
+\end{equation*}
+\\
+The reduction process is the same as in \textbf{Theorem 9.}\cite{gao2021focs}. And finally, we need to prove:
+\begin{equation*}
+\begin{aligned}
+ \operatorname{Pr}\left[\mathcal{E}^{\prime} \subseteq \mathcal{U}^{t}\right] & \leq \frac{1-\sum_{e \in \mathcal{E}^{\prime}} x_{e}^{t}}{\sum_{e \in \mathcal{E}^{\prime}} x_{e}^{t} w\left(y_{e}^{t-1}\right)+1-\sum_{e \in \mathcal{E}^{\prime}} x_{e}^{t}} \prod_{e \in \mathcal{E}^{\prime}} p\left(y_{e}^{t-1}\right) \\ & \leq \prod_{e \in \mathcal{E}^{\prime}} \frac{w\left(y_{e}^{t-1}\right)}{w\left(y_{e}^{t-1}+x_{e}^{t}\right)} \prod_{e \in \mathcal{E}^{\prime}} p\left(y_{e}^{t-1}\right)
+ \\&=\prod_{e \in \mathcal{E}^{\prime}} p\left(y_{e}^{t-1}+x_{e}^{t}\right)
+ \end{aligned}
+\end{equation*}
+Due to $x_e^t =  1/d$ and suppose $|\mathcal{E}^{\prime}| = k$,  the first inequality to be proven is as:
+\begin{equation}
+\label{eqn:recur-inequality}
+\left(\frac{1-\frac{k}{d}}{\sum_{i=1}^{k} \frac{1}{d} w\left(y_{i}\right)+1-\frac{k}{d}}\right)
+\leq
+\prod_{i=1}^{k}  \left(\frac{w\left(y_{i}\right)}{w\left(y_{i}+\frac{1}{d}\right)}\right)
+\end{equation}
+\\
+\textbf{Lemma 1.}
+\textit{The inequality (\ref{eqn:recur-inequality}) will be true once we prove the following one :} 
+
+\begin{equation*}
+    \left(\frac{1 - \frac{k}{d}}{ \frac{k}{d} w\left(y_{i}\right)+d - k}\right)
+    \leq 
+    \left(\frac{w\left(y_{i}\right)}{w\left(y_{i}+\frac{1}{d}\right)}\right)^{k}
+\end{equation*}
+\\
+\textit{Proof.} 
+When taking log on the both sides, the inequality (\ref{eqn:recur-inequality}) is as follows:
+\begin{equation*}
+\log \left(\frac{1-\frac{k}{d}}{\sum_{i=1}^{k} \frac{1}{d} w\left(y_{i}\right)+1-\frac{k}{d}}\right)
+\leq
+\sum_{i=1}^{k} \log \left(\frac{w\left(y_{i}\right)}{w\left(y_{i}+\frac{1}{d}\right)}\right)
+\end{equation*}
+\\
+due to log convexity of $f(x) = \log(\frac{1}{x})$, the lhs of the inequality (\ref{eqn:recur-inequality}) can be upper bounded:
+\begin{equation*}
+\log \left(\frac{1-\frac{k}{d}}{\sum_{i=1}^{k} \frac{1}{d} w\left(y_{i}\right)+1-\frac{k}{d}}\right)
+\leq 
+\frac{\sum^{k}_{i=1}\log \left(\frac{1-\frac{k}{d}}{ \frac{k}{d} w\left(y_{i}\right)+1-\frac{k}{d}}\right)}{k}
+\end{equation*}
+therefore, it suffices to prove 
+\begin{equation*}
+\frac{\sum^{k}_{i=1}\log \left(\frac{1-\frac{k}{d}}{ \frac{k}{d} w\left(y_{i}\right)+1-\frac{k}{d}}\right)}{k}
+\leq 
+\sum_{i=1}^{k} \log \left(\frac{w\left(y_{i}\right)}{w\left(y_{i}+\frac{1}{d}\right)}\right)
+\end{equation*}
+i.e., 
+\begin{equation*}
+\frac{\sum^{k}_{i=1}\log \left(\frac{1-\frac{k}{d}}{ \frac{k}{d} w\left(y_{i}\right)+1-\frac{k}{d}}\right)}{k}
+-
+\sum_{i=1}^{k} \log \left(\frac{w\left(y_{i}\right)}{w\left(y_{i}+\frac{1}{d}\right)}\right)
+\leq 
+0
+\end{equation*}
+since the partial derivation of lhs function is independent,
+it suffices to prove the above inequality when all $y_i$ taking the same values.
+\begin{equation*}
+\log \left(\frac{1-\frac{k}{d}}{ \frac{k}{d} w\left(y_{i}\right)+1-\frac{k}{d}}\right)
+-
+k\log \left(\frac{w\left(y_{i}\right)}{w\left(y_{i}+\frac{1}{d}\right)}\right)
+\leq 
+0
+\end{equation*}
+It is equivalent to prove 
+\begin{equation*}
+    \left(\frac{1 - \frac{k}{d}}{ \frac{k}{d} w\left(y_{i}\right)+1 - \frac{k}{d}}\right)
+    \leq 
+    \left(\frac{w\left(y_{i}\right)}{w\left(y_{i}+\frac{1}{d}\right)}\right)^{k}
+\end{equation*}
+\\
+Therefore, the value of $w(y_i)$ is bounded by the following iterative formula:
+\begin{equation*}
+    w\left(y_{i}+\frac{1}{d}\right)
+    \leq 
+    \left(\frac{w\left(y_{i}\right)}{ \left(\frac{d- k}{ k w\left(y_{i}\right)+d - k}\right)^{1/k}}\right)
+\end{equation*}
+\\
+Let $\omega(y) = \log(w(y))$, it is equivalent to prove 
+\begin{equation*}
+    \omega(y+\frac{1}{d}) - \omega(y) \leq  \frac{1}{k}\log(1 +\frac{ke^{\omega(y)}}{d - k} )
+\end{equation*}
+\\
+Let $z = \frac{k}{d}$, the right-hand side of the inequality is as:
+\begin{equation*}
+\begin{aligned}
+&\frac{1}{zd}\log(\frac{1 - z + ze^{\omega(y)}}{1 - z} )
+\\ 
+=&\frac{1}{d}\left(\frac{\log(1 - z + ze^{\omega(y)})}{z} - \frac{\log(1-z)}{z}
+\right)
+\end{aligned}
+\end{equation*}
+\\
+Let $f(z ) =\frac{1}{d}\left(\frac{\log(1 - z + ze^{\omega(y)})}{z} - \frac{\log(1-z)}{z}
+\right), z\in[0,1] $, the following is a sufficient condition.
+\begin{equation*}
+     \omega(y+\frac{1}{d}) - \omega(y) \leq  \min_{z\in[0,1]} f(z)
+\end{equation*}
+
+\bibliographystyle{IEEEtran}
+\bibliography{citation}
+\end{document}
