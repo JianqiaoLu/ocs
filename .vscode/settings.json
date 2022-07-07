@@ -8,7 +8,16 @@
         "iostream": "cpp",
         "fstream": "cpp",
         "compare": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "chrono": "cpp",
+        "functional": "cpp",
+        "initializer_list": "cpp",
+        "__config": "cpp",
+        "locale": "cpp",
+        "random": "cpp",
+        "algorithm": "cpp",
+        "tuple": "cpp",
+        "typeinfo": "cpp"
     },
 	"C_Cpp.errorSquiggles": "Enabled"
 }
